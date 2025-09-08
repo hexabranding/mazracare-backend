@@ -18,6 +18,9 @@ import blogRouter from './routes/blog.router.js';
 import dashboardRouter from './routes/dashboard.route.js';
 import EnquiryRouter  from './routes/enquiry.routes.js';
 import getInTouchRouter from './routes/getintouch.routes.js';
+import productDetailsCustomisationRoutes from './routes/productDetailsCustomisation.routes.js';
+import customizationRoutes from './routes/customization.routes.js';
+
 
 dotenv.config();
 const app=express();
@@ -42,6 +45,8 @@ app.use('/api/blog', blogRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/enquiry', EnquiryRouter);
 app.use('/api/getintouch', getInTouchRouter);
+app.use('/api/product-details-customisation', productDetailsCustomisationRoutes);
+app.use('/api/customization', customizationRoutes);
 
 
 // 404 Handler (if no route matches)

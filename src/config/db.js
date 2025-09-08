@@ -9,5 +9,6 @@ const connectDb = async () => {
     console.error("Error connecting to DB:", err);
   }
 };
+// mazracare
 
 export default connectDb;

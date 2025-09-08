@@ -72,13 +72,15 @@ export const signin = catchAsync(async (req, res, next) => {
   if (user.isBlocked) {
     return next(new ApiError(403, 'Your account has been blocked. Please contact support.'));
   }
+  console.log(user,'user');
+  
   
   // Check if email is verified
-  if (!user.verifyStatus) {
+  if (!user?.verifyStatus) {
     return next(new ApiError(403, 'Please verify your email first. Check your inbox for verification instructions.'));
   }
 
-  const isPasswordValid = await comparePasswords(password, user.password);
+  const isPasswordValid = await comparePasswords(password, user?.password);
   if (!isPasswordValid) {
     return next(new ApiError(401, 'Invalid credentials'));
   }

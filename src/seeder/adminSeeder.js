@@ -4,13 +4,14 @@ import User from '../models/user.model.js';
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGODB_URI;
+const MONGO_URI = `${process.env.MONGODB_URI}/mazracare`;
+
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 const seedAdmin = async () => {
   try {
-    await mongoose.connect(`${MONGO_URI}/mazracare`);
+    await mongoose.connect(MONGO_URI);
 
 
     const existingAdmin = await User.findOne({ email: ADMIN_EMAIL });

@@ -249,7 +249,6 @@ export const deleteProduct = catchAsync(async (req, res, next) => {
 
 
 export const getProductsByCategory = catchAsync(async (req, res, next) => {
-  const { categoryId } = req.params;
   let { page = 1, limit = 10, keyword = '', sort = '-createdAt' } = req.query;
   
   page = parseInt(page);
@@ -257,7 +256,6 @@ export const getProductsByCategory = catchAsync(async (req, res, next) => {
 
   // Build the filter criteria including the provided category id and optional keyword
   const filter = {
-    category: categoryId,
     name: { $regex: keyword, $options: 'i' },
   };
 
