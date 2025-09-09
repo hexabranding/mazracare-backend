@@ -28,7 +28,13 @@ const enquirySchema = new mongoose.Schema({
   serviceOther: { type: String },
   message: { type: String },
   crops: [{ type: String }],
-  customCrop: { type: String }
+  customCrop: { type: String },
+  images: [
+    {
+      url: { type: String, required: true },
+      public_id: { type: String },
+    },
+  ],
 }, {
   timestamps: true
 });

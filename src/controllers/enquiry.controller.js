@@ -4,10 +4,71 @@ import Enquiry from '../models/enquiry.model.js';
 export const createEnquiry = async (req, res) => {
   try {
     const userId = req.user._id;
-    const enquiry = new Enquiry({
-      ...req.body,
-      userId: userId
-    });
+    
+    // Handle uploaded images
+    const images = [];
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        images.push({
+          url: file.path,
+          public_id: file.filename
+        });
+      });
+    }
+    
+    // Parse array fields from form-data
+    const parseArrayField = (field) => {
+      if (!field) return [];
+      if (Array.isArray(field)) return field;
+      if (typeof field === 'string') {
+        try {
+          return JSON.parse(field);
+        } catch {
+          return field.split(',').map(item => item.trim());
+        }
+      }
+      return [];
+    };
+    
+    // Parse string fields from form-data
+    const parseStringField = (field) => {
+      if (!field) return '';
+      if (Array.isArray(field)) return field[0] || '';
+      return field.toString();
+    };
+    // data
+    const enquiryData = {
+      userId: userId,
+      fullName: parseStringField(req.body.fullName),
+      company: parseStringField(req.body.company),
+      email: parseStringField(req.body.email),
+      phone: parseStringField(req.body.phone),
+      location: parseStringField(req.body.location),
+      siteTypes: parseArrayField(req.body.siteTypes),
+      siteTypeOther: parseStringField(req.body.siteTypeOther),
+      spaceType: parseStringField(req.body.spaceType),
+      siteArea: parseStringField(req.body.siteArea),
+      siteAreaCustom: parseStringField(req.body.siteAreaCustom),
+      files: parseStringField(req.body.files),
+      purpose: parseArrayField(req.body.purpose),
+      purposeOther: parseStringField(req.body.purposeOther),
+      technology: parseStringField(req.body.technology),
+      waterAvailable: parseStringField(req.body.waterAvailable),
+      waterType: parseStringField(req.body.waterType),
+      electricityAvailable: parseStringField(req.body.electricityAvailable),
+      powerBackup: parseStringField(req.body.powerBackup),
+      greenhouseRequired: parseStringField(req.body.greenhouseRequired),
+      budget: parseStringField(req.body.budget),
+      timeline: parseStringField(req.body.timeline),
+      additionalServices: parseArrayField(req.body.additionalServices),
+      serviceOther: parseStringField(req.body.serviceOther),
+      message: parseStringField(req.body.message),
+      crops: parseArrayField(req.body.crops),
+      customCrop: parseStringField(req.body.customCrop),
+      images: images
+    };
+    
+    const enquiry = new Enquiry(enquiryData);
     await enquiry.save();
     res.status(201).json({ success: true, data: enquiry });
   } catch (error) {

@@ -20,6 +20,7 @@ import EnquiryRouter  from './routes/enquiry.routes.js';
 import getInTouchRouter from './routes/getintouch.routes.js';
 import productDetailsCustomisationRoutes from './routes/productDetailsCustomisation.routes.js';
 import customizationRoutes from './routes/customization.routes.js';
+import carriereRouter from './routes/carrier.routes.js';
 
 
 dotenv.config();
@@ -27,6 +28,9 @@ const app=express();
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+
+// Serve static files
+app.use('/uploads', express.static('uploads'));
 
 // Rate limiter
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
@@ -47,7 +51,7 @@ app.use('/api/enquiry', EnquiryRouter);
 app.use('/api/getintouch', getInTouchRouter);
 app.use('/api/product-details-customisation', productDetailsCustomisationRoutes);
 app.use('/api/customization', customizationRoutes);
-
+app.use('/api/carrier', carriereRouter);
 
 // 404 Handler (if no route matches)
 app.use((req, res, next) => {
