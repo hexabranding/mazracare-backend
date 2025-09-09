@@ -6,7 +6,7 @@ import Category from '../models/category.model.js';
 import cloudinary from '../config/cloudinary.js';
 
 export const addService = catchAsync(async (req, res, next) => {
-  const { name, description,heading,subHeading } = req.body;
+  const { name, description,heading,subHeading,subdescription } = req.body;
 
   if (!name || !description) {
     return next(new ApiError(400, 'Name and description are required'));
@@ -38,8 +38,9 @@ export const addService = catchAsync(async (req, res, next) => {
     description,
     heading,
     subHeading,
+    subdescription,
     image: imageUploads,
-video: videoUploads,
+    video: videoUploads,
   });
 
   res.status(201).json({
