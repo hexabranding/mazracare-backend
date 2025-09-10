@@ -167,7 +167,7 @@ export const getAllCategories = catchAsync(async (req, res, next) => {
 
 export const updateService = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const { name, description,heading,subHeading } = req.body;
+  const { name, description,heading,subHeading,subdescription } = req.body;
 
   const service = await Service.findById(id);
   if (!service) return next(new ApiError(404, 'Service not found'));
@@ -176,6 +176,7 @@ export const updateService = catchAsync(async (req, res, next) => {
   if (description) service.description = description;
   if (heading) service.heading = heading;
   if (subHeading) service.subHeading = subHeading;
+  if (subdescription) service.subdescription = subdescription;
 
   if (req.files?.image) {
 
