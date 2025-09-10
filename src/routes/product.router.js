@@ -2,6 +2,7 @@ import express from "express";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/role.middleware.js";
 import upload from "../middlewares/multer.middleware.js";
+import cloudinaryUpload from "../middlewares/cloudinary-multer.middleware.js";
 import {
   createProduct,
   deleteProduct,
@@ -19,7 +20,7 @@ productRouter.post(
   "/",
   verifyToken,
   authorizeRoles("Admin"),
-  upload.array("images", 5), // max 5 images
+  cloudinaryUpload.array("images", 5), // Direct Cloudinary upload
   createProduct
 );
 
@@ -30,7 +31,7 @@ productRouter.put(
   "/:id",
   verifyToken,
   authorizeRoles("Admin"),
-  upload.array("images", 5), // max 5 images
+  cloudinaryUpload.array("images", 5),
   updateProduct
 );
 

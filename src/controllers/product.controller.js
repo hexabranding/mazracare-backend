@@ -30,38 +30,11 @@ export const createProduct = catchAsync(async (req, res, next) => {
     return next(new ApiError(400, 'Product images are required'));
   }
 
-  const uploadedImages = [];
-
-  try {
-    for (const file of req.files) {
-      const compressedPath = `uploads/compressed-${file.filename}`;
-
-      await sharp(file.path)
-        .resize(1024)
-        .jpeg({ quality: 70 })
-        .toFile(compressedPath);
-
-      const result = await cloudinary.uploader.upload(compressedPath, {
-        folder: 'products',
-      });
-
-      uploadedImages.push({
-        url: result.secure_url,
-        public_id: result.public_id,
-      });
-
-      // Delete files with error handling
-      try {
-        await fs.unlink(file.path);
-        await fs.unlink(compressedPath);
-      } catch (unlinkError) {
-        console.warn('File cleanup warning:', unlinkError.message);
-      }
-    }
-  } catch (error) {
-    console.log(error);
-    return next(new ApiError(500, 'Image upload failed'));
-  }
+  // Files are already uploaded to Cloudinary
+  const uploadedImages = req.files.map(file => ({
+    url: file.path, // Cloudinary URL
+    public_id: file.filename // Cloudinary public_id
+  }));
 
   const product = await Product.create({
     name,
@@ -166,31 +139,11 @@ export const updateProduct = catchAsync(async (req, res, next) => {
       await cloudinary.uploader.destroy(img.public_id);
     }
 
-    // Upload new compressed images
-    for (const file of req.files) {
-      const compressedPath = `uploads/compressed-${file.filename}`;
-      await sharp(file.path)
-        .resize(1024)
-        .jpeg({ quality: 70 })
-        .toFile(compressedPath);
-
-      const result = await cloudinary.uploader.upload(compressedPath, {
-        folder: 'products',
-      });
-
-      newImages.push({
-        url: result.secure_url,
-        public_id: result.public_id,
-      });
-
-      // Delete files with error handling
-      try {
-        await fs.unlink(file.path);
-        await fs.unlink(compressedPath);
-      } catch (unlinkError) {
-        console.warn('File cleanup warning:', unlinkError.message);
-      }
-    }
+    // Files already uploaded to Cloudinary
+    newImages.push(...req.files.map(file => ({
+      url: file.path,
+      public_id: file.filename
+    })));
   }
 
   // Update product fields
