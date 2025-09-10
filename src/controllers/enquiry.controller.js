@@ -1,19 +1,26 @@
 import Enquiry from '../models/enquiry.model.js';
+import { uploadToCloudinary } from '../utils/cloudinary.upload.js';
 
 // User creates enquiry
 export const createEnquiry = async (req, res) => {
   try {
     const userId = req.user._id;
     
-    // Handle uploaded images
+    // Handle uploaded images - Upload to Cloudinary
     const images = [];
     if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        images.push({
-          url: file.path,
-          public_id: file.filename
-        });
-      });
+      for (const file of req.files) {
+        try {
+          const uploadResult = await uploadToCloudinary(file, 'enquiry-images');
+          images.push({
+            url: uploadResult.url,
+            public_id: uploadResult.public_id
+          });
+        } catch (uploadError) {
+          console.error('Error uploading image to Cloudinary:', uploadError);
+          // Continue with other images even if one fails
+        }
+      }
     }
     
     // Parse array fields from form-data
