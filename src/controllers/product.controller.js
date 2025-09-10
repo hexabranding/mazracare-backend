@@ -34,29 +34,32 @@ export const createProduct = catchAsync(async (req, res, next) => {
 
   try {
     for (const file of req.files) {
-  const compressedPath = `uploads/compressed-${file.filename}`;
+      const compressedPath = `uploads/compressed-${file.filename}`;
 
-  await sharp(file.path)
-    .resize(1024) // resize width (auto height)
-    .jpeg({ quality: 70 }) // compress
-    .toFile(compressedPath);
+      await sharp(file.path)
+        .resize(1024)
+        .jpeg({ quality: 70 })
+        .toFile(compressedPath);
 
-  const result = await cloudinary.uploader.upload(compressedPath, {
-    folder: 'products',
-  });
+      const result = await cloudinary.uploader.upload(compressedPath, {
+        folder: 'products',
+      });
 
-  uploadedImages.push({
-    url: result.secure_url,
-    public_id: result.public_id,
-  });
+      uploadedImages.push({
+        url: result.secure_url,
+        public_id: result.public_id,
+      });
 
-  // Delete both original and compressed files
-  await fs.unlink(file.path);
-  await fs.unlink(compressedPath);
-}
+      // Delete files with error handling
+      try {
+        await fs.unlink(file.path);
+        await fs.unlink(compressedPath);
+      } catch (unlinkError) {
+        console.warn('File cleanup warning:', unlinkError.message);
+      }
+    }
   } catch (error) {
     console.log(error);
-    
     return next(new ApiError(500, 'Image upload failed'));
   }
 
@@ -180,8 +183,13 @@ export const updateProduct = catchAsync(async (req, res, next) => {
         public_id: result.public_id,
       });
 
-      await fs.unlink(file.path);
-      await fs.unlink(compressedPath);
+      // Delete files with error handling
+      try {
+        await fs.unlink(file.path);
+        await fs.unlink(compressedPath);
+      } catch (unlinkError) {
+        console.warn('File cleanup warning:', unlinkError.message);
+      }
     }
   }
 
