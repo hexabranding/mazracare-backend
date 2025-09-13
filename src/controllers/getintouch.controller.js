@@ -1,10 +1,26 @@
 import GetInTouch from '../models/getintouch.model.js';
+import { sendEmail } from '../config/email.js';
+import { getInTouchNotificationTemplate } from '../utils/templates.js';
+import { company_email } from '../config/index.js';
 
 // User creates get in touch
 export const createGetInTouch = async (req, res) => {
   try {
     const getInTouch = new GetInTouch(req.body);
     await getInTouch.save();
+    
+    // Send notification email
+    try {
+      const emailTemplate = getInTouchNotificationTemplate(req.body);
+      await sendEmail(
+        company_email,
+        'New Get In Touch Request - Mazracare',
+        emailTemplate
+      );
+    } catch (emailError) {
+      console.error('Failed to send get in touch notification email:', emailError.message);
+    }
+    
     res.status(201).json({ success: true, data: getInTouch });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });

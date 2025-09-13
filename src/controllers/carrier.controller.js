@@ -1,4 +1,7 @@
 import Carrier from '../models/carrier.model.js';
+import { sendEmail } from '../config/email.js';
+import { carrierNotificationTemplate } from '../utils/templates.js';
+import { backend_url, company_email } from '../config/index.js';
 
 // Create carrier application
 export const createCarrier = async (req, res) => {
@@ -25,6 +28,18 @@ export const createCarrier = async (req, res) => {
     
     const carrier = new Carrier(carrierData);
     await carrier.save();
+    
+    // Send notification email to Growth@mazracare.com
+    try {
+      const emailTemplate = carrierNotificationTemplate(carrierData,backend_url);
+      await sendEmail(
+        company_email,
+        'New Carrier Application - Mazracare',
+        emailTemplate
+      );
+    } catch (emailError) {
+      console.error('Failed to send carrier notification email:', emailError.message);
+    }
     
     res.status(201).json({
       success: true,

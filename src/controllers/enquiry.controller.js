@@ -1,5 +1,8 @@
 import Enquiry from '../models/enquiry.model.js';
 import { uploadToCloudinary } from '../utils/cloudinary.upload.js';
+import { sendEmail } from '../config/email.js';
+import { enquiryNotificationTemplate } from '../utils/templates.js';
+import { company_email } from '../config/index.js';
 
 // User creates enquiry
 export const createEnquiry = async (req, res) => {
@@ -77,6 +80,19 @@ export const createEnquiry = async (req, res) => {
     
     const enquiry = new Enquiry(enquiryData);
     await enquiry.save();
+    
+    // Send notification email
+    try {
+      const emailTemplate = enquiryNotificationTemplate(enquiryData, req.user);
+      await sendEmail(
+        company_email,
+        'New Enquiry Received - Mazracare',
+        emailTemplate
+      );
+    } catch (emailError) {
+      console.error('Failed to send enquiry notification email:', emailError.message);
+    }
+    
     res.status(201).json({ success: true, data: enquiry });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });

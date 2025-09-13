@@ -1,10 +1,12 @@
 import ProductDetailsCustomisation from '../models/productDetailsCustomisation.model.js';
+import { sendEmail } from '../config/email.js';
+import { productDetailsCustomisationNotificationTemplate } from '../utils/templates.js';
+import { company_email } from '../config/index.js';
 
 // Create product details customisation
 export const createProductDetailsCustomisation = async (req, res) => {
   try {
     const userId = req.user._id;
-console.log(req.body,'req.body');
 
     const productDetails = new ProductDetailsCustomisation({
       ...req.body,
@@ -12,6 +14,18 @@ console.log(req.body,'req.body');
     });
     
     await productDetails.save();
+    
+    // Send notification email
+    try {
+      const emailTemplate = productDetailsCustomisationNotificationTemplate(productDetails, req.user);
+      await sendEmail(
+        company_email,
+        'New Product Details Customisation - Mazracare',
+        emailTemplate
+      );
+    } catch (emailError) {
+      console.error('Failed to send product details customisation notification email:', emailError.message);
+    }
     
     res.status(201).json({
       success: true,

@@ -1,4 +1,7 @@
 import Customization from '../models/customization.model.js';
+import { sendEmail } from '../config/email.js';
+import { customizationNotificationTemplate } from '../utils/templates.js';
+import { company_email } from '../config/index.js';
 
 // Create customization
 export const createCustomization = async (req, res) => {
@@ -11,6 +14,18 @@ export const createCustomization = async (req, res) => {
     });
     
     await customization.save();
+    
+    // Send notification email
+    try {
+      const emailTemplate = customizationNotificationTemplate(customization, req.user);
+      await sendEmail(
+        company_email,
+        'New Customization Request - Mazracare',
+        emailTemplate
+      );
+    } catch (emailError) {
+      console.error('Failed to send customization notification email:', emailError.message);
+    }
     
     res.status(201).json({
       success: true,
