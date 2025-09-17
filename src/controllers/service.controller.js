@@ -252,7 +252,7 @@ export const updateCategory = catchAsync(async (req, res, next) => {
 export const deleteService = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  const service = await Service.findById(id);
+  const  service = await Service.findById(id);
   if (!service) return next(new ApiError(404, 'Service not found'));
 
   // Delete Cloudinary media

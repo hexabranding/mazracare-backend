@@ -6,10 +6,6 @@ import { authorizeRoles } from '../middlewares/role.middleware.js';
 
 const serviceRouter=express.Router();
 
-
-
-
-
 serviceRouter.post(
   '/add-service',
   verifyToken,
