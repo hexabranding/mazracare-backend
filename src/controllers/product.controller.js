@@ -22,7 +22,7 @@ export const createProduct = catchAsync(async (req, res, next) => {
     usp
   } = req.body;
 
-  if (!name || !description || !price || !service || !category || !stock) {
+  if (!name || !description || !service || !category || !stock) {
     return next(new ApiError(400, 'Missing required product fields'));
   }
 
