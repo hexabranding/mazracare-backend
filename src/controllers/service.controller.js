@@ -1,7 +1,7 @@
 import Service from '../models/service.model.js';
 import catchAsync from '../middlewares/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
-import { uploadToCloudinary } from '../utils/cloudinary.upload.js';
+import { uploadToCloudinary, fastBatchUpload } from '../utils/cloudinary.upload.js';
 import Category from '../models/category.model.js';
 import cloudinary from '../config/cloudinary.js';
 
@@ -16,21 +16,17 @@ export const addService = catchAsync(async (req, res, next) => {
   if (exists) return next(new ApiError(400, 'Service already exists'));
 
 
-  let imageUploads=[];
-  let videoUploads=[];
+  let imageUploads = [];
+  let videoUploads = [];
   
-  if (req.files?.image ) {
-    
-    imageUploads = await Promise.all(
-      req.files.image.map(file => uploadToCloudinary(file, 'services', 'image'))
-    );
-  }
+  // Ultra-fast parallel uploads
+  const [imageResults, videoResults] = await Promise.all([
+    req.files?.image ? fastBatchUpload(req.files.image, 'services', 'image') : Promise.resolve([]),
+    req.files?.video ? fastBatchUpload(req.files.video, 'services', 'video') : Promise.resolve([])
+  ]);
   
-  if (req.files?.video ) {
-    videoUploads = await Promise.all(
-      req.files.video.map(file => uploadToCloudinary(file, 'services', 'video'))
-    );
-  }
+  imageUploads = imageResults;
+  videoUploads = videoResults;
 
 
   const service = await Service.create({
@@ -179,25 +175,30 @@ export const updateService = catchAsync(async (req, res, next) => {
   if (subdescription) service.subdescription = subdescription;
 
   if (req.files?.image) {
-
-  for (const img of service.image || []) {
-    await cloudinary.uploader.destroy(img.public_id);
+    // Delete old images
+    if (service.image && service.image.length > 0) {
+      await Promise.all(
+        service.image.map(img => 
+          img?.public_id ? cloudinary.uploader.destroy(img.public_id) : Promise.resolve()
+        )
+      );
+    }
+    // Upload new images
+    service.image = await fastBatchUpload(req.files.image, 'services', 'image');
   }
-
-  service.image = await Promise.all(
-    req.files.image.map(file => uploadToCloudinary(file, 'services', 'image'))
-  );
-}
+  
   if (req.files?.video) {
-
-  for (const video of service.video || []) {
-    await cloudinary.uploader.destroy(video.public_id);
+    // Delete old videos
+    if (service.video && service.video.length > 0) {
+      await Promise.all(
+        service.video.map(video => 
+          video?.public_id ? cloudinary.uploader.destroy(video.public_id) : Promise.resolve()
+        )
+      );
+    }
+    // Upload new videos
+    service.video = await fastBatchUpload(req.files.video, 'services', 'video');
   }
-
-  service.video = await Promise.all(
-    req.files.video.map(file => uploadToCloudinary(file, 'services', 'video'))
-  );
-}
   await service.save();
 
   res.status(200).json({
