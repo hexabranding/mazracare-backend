@@ -15,19 +15,8 @@ export const addService = catchAsync(async (req, res, next) => {
   const exists = await Service.findOne({ name });
   if (exists) return next(new ApiError(400, 'Service already exists'));
 
-
-  let imageUploads = [];
-  let videoUploads = [];
-  
-  // Ultra-fast parallel uploads
-  const [imageResults, videoResults] = await Promise.all([
-    req.files?.image ? fastBatchUpload(req.files.image, 'services', 'image') : Promise.resolve([]),
-    req.files?.video ? fastBatchUpload(req.files.video, 'services', 'video') : Promise.resolve([])
-  ]);
-  
-  imageUploads = imageResults;
-  videoUploads = videoResults;
-
+  const imageUploads = req.uploadedMedia?.filter(media => media.mediaType === 'image') || [];
+  const videoUploads = req.uploadedMedia?.filter(media => media.mediaType === 'video') || [];
 
   const service = await Service.create({
     name,
@@ -63,17 +52,8 @@ export const addCategory = catchAsync(async (req, res, next) => {
   const exists = await Category.findOne({ name });
   if (exists) return next(new ApiError(400, 'Category already exists'));
 
-  let image = {}, video = {};
-
-
-  if (req.files?.image) {
-    image = await uploadToCloudinary(req.files.image[0], 'categories', 'image');
-  }
-
-  if (req.files?.video) {
-    video = await uploadToCloudinary(req.files.video[0], 'categories', 'video');
-  }
-
+  const image = req.uploadedMedia?.find(media => media.mediaType === 'image') || {};
+  const video = req.uploadedMedia?.find(media => media.mediaType === 'video') || {};
 
   const category = await Category.create({
     name,
@@ -174,31 +154,35 @@ export const updateService = catchAsync(async (req, res, next) => {
   if (subHeading) service.subHeading = subHeading;
   if (subdescription) service.subdescription = subdescription;
 
-  if (req.files?.image) {
-    // Delete old images
-    if (service.image && service.image.length > 0) {
-      await Promise.all(
-        service.image.map(img => 
-          img?.public_id ? cloudinary.uploader.destroy(img.public_id) : Promise.resolve()
-        )
-      );
+  if (req.uploadedMedia) {
+    const imageUploads = req.uploadedMedia.filter(media => media.mediaType === 'image');
+    const videoUploads = req.uploadedMedia.filter(media => media.mediaType === 'video');
+    
+    if (imageUploads.length > 0) {
+      // Delete old images
+      if (service.image && service.image.length > 0) {
+        await Promise.all(
+          service.image.map(img => 
+            img?.public_id ? cloudinary.uploader.destroy(img.public_id) : Promise.resolve()
+          )
+        );
+      }
+      service.image = imageUploads;
     }
-    // Upload new images
-    service.image = await fastBatchUpload(req.files.image, 'services', 'image');
+    
+    if (videoUploads.length > 0) {
+      // Delete old videos
+      if (service.video && service.video.length > 0) {
+        await Promise.all(
+          service.video.map(video => 
+            video?.public_id ? cloudinary.uploader.destroy(video.public_id) : Promise.resolve()
+          )
+        );
+      }
+      service.video = videoUploads;
+    }
   }
   
-  if (req.files?.video) {
-    // Delete old videos
-    if (service.video && service.video.length > 0) {
-      await Promise.all(
-        service.video.map(video => 
-          video?.public_id ? cloudinary.uploader.destroy(video.public_id) : Promise.resolve()
-        )
-      );
-    }
-    // Upload new videos
-    service.video = await fastBatchUpload(req.files.video, 'services', 'video');
-  }
   await service.save();
 
   res.status(200).json({
@@ -225,18 +209,23 @@ export const updateCategory = catchAsync(async (req, res, next) => {
     category.service = serviceId;
   }
 
-  if (req.files?.image) {
-    if (category.image?.public_id) {
-      await cloudinary.uploader.destroy(category.image.public_id);
+  if (req.uploadedMedia) {
+    const imageUpload = req.uploadedMedia.find(media => media.mediaType === 'image');
+    const videoUpload = req.uploadedMedia.find(media => media.mediaType === 'video');
+    
+    if (imageUpload) {
+      if (category.image?.public_id) {
+        await cloudinary.uploader.destroy(category.image.public_id);
+      }
+      category.image = imageUpload;
     }
-    category.image = await uploadToCloudinary(req.files.image[0], 'categories', 'image');
-  }
 
-  if (req.files?.video) {
-    if (category.video?.public_id) {
-      await cloudinary.uploader.destroy(category.video.public_id);
+    if (videoUpload) {
+      if (category.video?.public_id) {
+        await cloudinary.uploader.destroy(category.video.public_id);
+      }
+      category.video = videoUpload;
     }
-    category.video = await uploadToCloudinary(req.files.video[0], 'categories', 'video');
   }
 
   await category.save();

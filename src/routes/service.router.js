@@ -3,6 +3,8 @@ import { verifyToken } from '../middlewares/auth.middleware.js';
 import { addCategory, addService, deleteCategory, deleteService, getAllCategories, getAllServices, getCategoriesByService, getSingleCategory, getSingleService, updateCategory, updateService } from '../controllers/service.controller.js';
 import upload from '../middlewares/multer.middleware.js';
 import { authorizeRoles } from '../middlewares/role.middleware.js';
+import { mediaUploader, uploader } from '../utils/multer.js';
+import { uploadMediaToCloudinary, uploadToCloudinaryMultiple } from '../utils/cloudinary.js';
 
 const serviceRouter=express.Router();
 
@@ -10,20 +12,52 @@ serviceRouter.post(
   '/add-service',
   verifyToken,
   authorizeRoles("Admin"),
-  upload.fields([
-  { name: 'image', maxCount: 5 },
-  { name: 'video', maxCount: 5 }
-]),
+  mediaUploader.fields([
+    { name: 'image', maxCount: 5 },
+    { name: 'video', maxCount: 5 }
+  ]),
+  uploadMediaToCloudinary({
+    destinationPath: "services",
+  }),
   addService
 );
+
+
+  serviceRouter.post(
+    "/cloudinary",
+    uploader.array("media", 5),
+    uploadToCloudinaryMultiple({
+      destinationPath: "reviews",
+    }), (req, res) => {
+      return res.json({ message: "File uploaded to Cloudinary", data: req.uploadedImages, code: 200 });
+    });
+
+      serviceRouter.post(
+    "/media/cloudinary",
+    mediaUploader.fields([
+      { name: 'image', maxCount: 5 },
+      { name: 'video', maxCount: 5 }
+    ]),
+    uploadMediaToCloudinary({
+      destinationPath: "reviews",
+    }), (req, res) => {
+      return res.json({ message: "Media uploaded to Cloudinary", data: req.uploadedMedia, code: 200 });
+    });
+
+
+
+
 serviceRouter.post(
   '/add-category',
   verifyToken,
   authorizeRoles("Admin"),
-  upload.fields([
+  mediaUploader.fields([
     { name: 'image', maxCount: 1 },
-    { name: 'video', maxCount: 1 },
+    { name: 'video', maxCount: 1 }
   ]),
+  uploadMediaToCloudinary({
+    destinationPath: "categories",
+  }),
   addCategory
 );
 
@@ -51,10 +85,13 @@ serviceRouter.put(
   '/service/:id',
   verifyToken,
   authorizeRoles("Admin"),
-  upload.fields([
-  { name: 'image', maxCount: 5 },
-  { name: 'video', maxCount: 5 }
-]),
+  mediaUploader.fields([
+    { name: 'image', maxCount: 5 },
+    { name: 'video', maxCount: 5 }
+  ]),
+  uploadMediaToCloudinary({
+    destinationPath: "services",
+  }),
   updateService
 );
 
@@ -63,7 +100,13 @@ serviceRouter.put(
   '/category/:id',
   verifyToken,
   authorizeRoles("Admin"),
-  upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]),
+  mediaUploader.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'video', maxCount: 1 }
+  ]),
+  uploadMediaToCloudinary({
+    destinationPath: "categories",
+  }),
   updateCategory
 );
 
