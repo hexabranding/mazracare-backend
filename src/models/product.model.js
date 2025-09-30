@@ -18,8 +18,6 @@ const productSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    // required: [true, 'Product price is required'],
-    min: [0, 'Price must be positive'],
   },
   discountPercent: {
     type: Number,

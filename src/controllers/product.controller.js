@@ -149,10 +149,10 @@ export const updateProduct = catchAsync(async (req, res, next) => {
   // Update product fields
   product.name = name || product.name;
   product.description = description || product.description;
-  product.price = price || product.price;
+  product.price = price || product?.price;
   product.discountPercent = discountPercent || product.discountPercent;
   product.service = service || product.service;
-  product.category = category || product.category;
+  product.category = category || product?.category;
   product.stock = stock || product.stock;
   product.isFeatured = isFeatured !== undefined ? isFeatured : product.isFeatured;
   product.usp = usp || product.usp;
