@@ -1,6 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../middlewares/auth.middleware.js';
-import { addCategory, addService, deleteCategory, deleteService, getAllCategories, getAllServices, getCategoriesByService, getSingleCategory, getSingleService, updateCategory, updateService } from '../controllers/service.controller.js';
+import { addCategory, addService, deleteCategory, deleteService, getAllCategories, getAllServices, getCategoriesByService, getSingleCategory, getSingleService, updateCategory, updateService, removeCloudinaryFile } from '../controllers/service.controller.js';
 import upload from '../middlewares/multer.middleware.js';
 import { authorizeRoles } from '../middlewares/role.middleware.js';
 import { mediaUploader, uploader } from '../utils/multer.js';
@@ -139,6 +139,14 @@ serviceRouter.get(
   // verifyToken,
   // authorizeRoles("Admin"),
   getSingleService
+);
+
+// Remove file from Cloudinary (Admin only)
+serviceRouter.delete(
+  '/remove-file',
+  verifyToken,
+  authorizeRoles("Admin"),
+  removeCloudinaryFile
 );
 
 

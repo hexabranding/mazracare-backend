@@ -324,3 +324,19 @@ export const getSingleCategory = catchAsync(async (req, res, next) => {
     data: category,
   });
 });
+
+// Remove specific file from Cloudinary (Admin only)
+export const removeCloudinaryFile = catchAsync(async (req, res, next) => {
+  const { public_id } = req.body;
+
+  if (!public_id) {
+    return next(new ApiError(400, 'Public ID is required'));
+  }
+
+  await cloudinary.uploader.destroy(public_id);
+
+  res.status(200).json({
+    success: true,
+    message: 'File removed successfully from Cloudinary',
+  });
+});
