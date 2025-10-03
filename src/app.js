@@ -21,6 +21,7 @@ import getInTouchRouter from './routes/getintouch.routes.js';
 import productDetailsCustomisationRoutes from './routes/productDetailsCustomisation.routes.js';
 import customizationRoutes from './routes/customization.routes.js';
 import carriereRouter from './routes/carrier.routes.js';
+import galleryRouter from './routes/gallery.router.js';
 
 
 dotenv.config();
@@ -53,6 +54,7 @@ app.use('/api/getintouch', getInTouchRouter);
 app.use('/api/product-details-customisation', productDetailsCustomisationRoutes);
 app.use('/api/customization', customizationRoutes);
 app.use('/api/carrier', carriereRouter);
+app.use('/api/gallery', galleryRouter);
 
 // 404 Handler (if no route matches)
 app.use((req, res, next) => {

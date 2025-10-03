@@ -22,7 +22,7 @@ export const createProduct = catchAsync(async (req, res, next) => {
     usp
   } = req.body;
 
-  if (!name || !description || !service || !category || !stock) {
+  if (!name || !description || !stock) {
     return next(new ApiError(400, 'Missing required product fields'));
   }
 
@@ -149,10 +149,16 @@ export const updateProduct = catchAsync(async (req, res, next) => {
   // Update product fields
   product.name = name || product.name;
   product.description = description || product.description;
-  product.price = price || product.price;
+  if(!isNull(price)){
+    product.price = price 
+  }
+  if(!isNull(category)){
+    product.category = category
+  }
+  if(!isNull(service)){
+    product.service = service
+  }
   product.discountPercent = discountPercent || product.discountPercent;
-  product.service = service || product.service;
-  product.category = category || product.category;
   product.stock = stock || product.stock;
   product.isFeatured = isFeatured !== undefined ? isFeatured : product.isFeatured;
   product.usp = usp || product.usp;
