@@ -84,3 +84,22 @@ export const getAllCarriers = async (req, res) => {
     });
   }
 };
+
+// Get all carrier applications with pagination
+export const getSingleCarriers = async (req, res) => {
+  try {
+    const {id}= req.query
+
+    const carriers = await Carrier.findOne({ _id: id });
+
+    res.status(200).json({
+      success: true,
+      data: carriers,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

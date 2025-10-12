@@ -64,6 +64,33 @@ export const getAllGetInTouch = async (req, res) => {
   }
 };
 
+// Admin lists all get in touch with pagination and filters
+export const getSingleGetInTouch = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    const getInTouch = await GetInTouch.findById(id);
+
+    if (!getInTouch) {
+      return res.status(404).json({
+        success: false,
+        message: 'Get in touch not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: getInTouch
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+   
+
 // Update get in touch status
 export const updateGetInTouchStatus = async (req, res) => {
   try {
@@ -87,4 +114,4 @@ export const updateGetInTouchStatus = async (req, res) => {
   }
 };
 
-export default { createGetInTouch, getAllGetInTouch, updateGetInTouchStatus };
+export default { createGetInTouch, getAllGetInTouch, getSingleGetInTouch, updateGetInTouchStatus };

@@ -31,12 +31,12 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
 
-// Serve static files
+// Serve static files (before rate limiter)
 app.use('/uploads', express.static('uploads'));
 
 // Rate limiter
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-app.use(limiter);
+app.use('/api', limiter);
 
 // Routes
 app.use('/api/auth', authRouter);

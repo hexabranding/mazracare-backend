@@ -91,3 +91,32 @@ export const getUserProductDetailsCustomisations = async (req, res) => {
     });
   }
 };
+
+// Get user's own product details customisations
+export const getUserSingleProductDetailsCustomisations = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    const productDetails = await ProductDetailsCustomisation.findOne({ _id: id })
+      .sort({ createdAt: -1 });
+
+    if (!productDetails) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product details customisation not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: productDetails
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+  

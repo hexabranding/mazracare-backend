@@ -137,6 +137,26 @@ export const getAllEnquiries = async (req, res) => {
   }
 };
 
+
+// Admin lists all enquiries with pagination and filters
+export const getSingleEnquiry = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const enquiry = await Enquiry.findById(id)
+      .populate('userId', 'name email avatar');
+
+    if (!enquiry) {
+      return res.status(404).json({ success: false, error: 'Enquiry not found' });
+    }
+
+    res.json({ success: true, data: enquiry });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+   
+
 // Update enquiry status
 export const updateStatus = async (req, res) => {
   try {
@@ -159,4 +179,4 @@ export const updateStatus = async (req, res) => {
   }
 };
 
-export default { createEnquiry, getAllEnquiries, updateStatus };
+export default { createEnquiry,getSingleEnquiry, getAllEnquiries, updateStatus };

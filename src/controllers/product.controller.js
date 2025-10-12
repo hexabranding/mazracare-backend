@@ -96,6 +96,23 @@ export const getAllProducts = catchAsync(async (req, res, next) => {
 
 
 
+export const getSingleProducts = catchAsync(async (req, res, next) => {
+  let {
+    id
+  } = req.query;
+
+  const products = await Product.find({ _id: id });
+
+  res.status(200).json({
+    success: true,
+    data: products,
+  });
+});
+
+ 
+
+
+
 export const getProductBySlug = catchAsync(async (req, res, next) => {
   const product = await Product.findOne({ slug: req.params.slug });
 

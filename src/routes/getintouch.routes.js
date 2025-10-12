@@ -7,6 +7,7 @@ const router = express.Router();
 
 // User routes
 router.post('/add', getInTouchController.createGetInTouch);
+router.get('/list', getInTouchController.getSingleGetInTouch);
 
 // Admin routes
 router.get('/list', verifyToken, authorizeRoles("Admin"), getInTouchController.getAllGetInTouch);

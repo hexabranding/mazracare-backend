@@ -91,3 +91,32 @@ export const getUserCustomizations = async (req, res) => {
     });
   }
 };
+
+
+// Get all customizations for admin with pagination
+export const getSingleCustomizations = async (req, res) => {
+  try {
+    const {id}=req.query;
+
+    const customization = await Customization.findById(id)
+      .populate('userId', 'username email avatar');
+
+    if (!customization) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customization not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: customization
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+    
