@@ -141,7 +141,7 @@ export const getAllEnquiries = async (req, res) => {
 // Admin lists all enquiries with pagination and filters
 export const getSingleEnquiry = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.query;
 
     const enquiry = await Enquiry.findById(id)
       .populate('userId', 'name email avatar');
