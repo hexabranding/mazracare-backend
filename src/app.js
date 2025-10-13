@@ -33,10 +33,11 @@ app.use(cookieParser());
 
 // Serve static files (before rate limiter)
 app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('./uploads'));
 
 // Rate limiter
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-app.use('/api', limiter);
+app.use(limiter);
 
 // Routes
 app.use('/api/auth', authRouter);

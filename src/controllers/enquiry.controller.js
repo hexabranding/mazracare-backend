@@ -3,6 +3,7 @@ import { uploadToCloudinary } from '../utils/cloudinary.upload.js';
 import { sendEmail } from '../config/email.js';
 import { enquiryNotificationTemplate } from '../utils/templates.js';
 import { company_email } from '../config/index.js';
+import { isNull } from '../utils/functions.js';
 
 // User creates enquiry
 export const createEnquiry = async (req, res) => {
@@ -49,6 +50,7 @@ export const createEnquiry = async (req, res) => {
     // data
     const enquiryData = {
       userId: userId,
+      serviceId: parseStringField(req.body.serviceId),
       fullName: parseStringField(req.body.fullName),
       company: parseStringField(req.body.company),
       email: parseStringField(req.body.email),
@@ -102,10 +104,11 @@ export const createEnquiry = async (req, res) => {
 // Admin lists all enquiries with pagination and filters
 export const getAllEnquiries = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status, search } = req.query;
+    const { page = 1, limit = 10, status, search, serviceId } = req.query;
     const filter = {};
     
     if (status) filter.status = status;
+    if (!isNull(serviceId)) filter.serviceId = serviceId;
     if (search) {
       filter.$or = [
         { fullName: { $regex: search, $options: 'i' } },
