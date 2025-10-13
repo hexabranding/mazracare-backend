@@ -37,6 +37,16 @@ app.use('/uploads', express.static('uploads'));
 app.use('/uploads', express.static('./uploads'));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
+// Explicit route for file serving (production fix)
+app.get('/uploads/*', (req, res) => {
+  const filePath = path.join(process.cwd(), req.path);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.status(404).json({ success: false, message: 'File not found' });
+    }
+  });
+});
+
 // Rate limiter
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use(limiter);
