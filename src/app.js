@@ -35,18 +35,8 @@ app.use(cookieParser());
 // Serve static files (before rate limiter)
 app.use('/uploads', express.static('uploads'));
 app.use('/uploads', express.static('./uploads'));
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-
-// Explicit route for file serving (production fix)
-app.get('/uploads/:folder/:filename', (req, res) => {
-  const { folder, filename } = req.params;
-  const filePath = path.join(process.cwd(), 'uploads', folder, filename);
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      res.status(404).json({ success: false, message: 'File not found' });
-    }
-  });
-});
+app.use('/public', express.static(path.join(process.cwd(), 'src', 'public')));
+app.use('/', express.static(path.join(process.cwd(), 'src', 'public')));
 
 // Rate limiter
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
