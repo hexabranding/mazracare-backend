@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const enquirySchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service' },
   status: { type: String, enum: ['pending', 'verified'], default: 'pending' },
   fullName: { type: String, required: true },
   company: { type: String },

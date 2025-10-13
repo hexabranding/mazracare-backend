@@ -8,7 +8,7 @@ const router = express.Router();
 
 // User routes
 router.post('/add', verifyToken, upload.array('images', 5), enquiryController.createEnquiry);
-router.get('/list', enquiryController.getSingleEnquiry);
+router.get('/single', enquiryController.getSingleEnquiry);
 
 // Admin routes
 router.get('/list', verifyToken,  authorizeRoles("Admin"), enquiryController.getAllEnquiries);
