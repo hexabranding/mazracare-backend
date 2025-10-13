@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 
 import errorHandler from './middlewares/error.middleware.js';
 import ApiError from './utils/ApiError.js';
@@ -34,6 +35,7 @@ app.use(cookieParser());
 // Serve static files (before rate limiter)
 app.use('/uploads', express.static('uploads'));
 app.use('/uploads', express.static('./uploads'));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Rate limiter
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
