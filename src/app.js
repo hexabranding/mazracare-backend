@@ -38,8 +38,9 @@ app.use('/uploads', express.static('./uploads'));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Explicit route for file serving (production fix)
-app.get('/uploads/*', (req, res) => {
-  const filePath = path.join(process.cwd(), req.path);
+app.get('/uploads/:folder/:filename', (req, res) => {
+  const { folder, filename } = req.params;
+  const filePath = path.join(process.cwd(), 'uploads', folder, filename);
   res.sendFile(filePath, (err) => {
     if (err) {
       res.status(404).json({ success: false, message: 'File not found' });
