@@ -166,6 +166,21 @@ export const getAllOrders = catchAsync(async (req, res, next) => {
 
 
 
+export const getSingleOrder = catchAsync(async (req, res, next) => {
+  const { id } = req.query;
+
+  const order = await Order.findById(id)
+    .populate('user', 'username email')
+    .populate('orderItems.product', 'name price slug description discountPercent discountedPrice');
+
+  if (!order) return next(new ApiError(404, 'Order not found'));
+
+  res.status(200).json({
+    success: true,
+    data: order,
+  });
+});
+
 
 
 export const updateOrderStatus = catchAsync(async (req, res, next) => {
