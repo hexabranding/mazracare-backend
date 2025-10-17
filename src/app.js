@@ -23,6 +23,7 @@ import productDetailsCustomisationRoutes from './routes/productDetailsCustomisat
 import customizationRoutes from './routes/customization.routes.js';
 import carriereRouter from './routes/carrier.routes.js';
 import galleryRouter from './routes/gallery.router.js';
+import addressRouter from './routes/address.router.js';
 
 
 dotenv.config();
@@ -59,6 +60,7 @@ app.use('/api/product-details-customisation', productDetailsCustomisationRoutes)
 app.use('/api/customization', customizationRoutes);
 app.use('/api/carrier', carriereRouter);
 app.use('/api/gallery', galleryRouter);
+app.use('/api/address', addressRouter);
 
 // 404 Handler (if no route matches)
 app.use((req, res, next) => {

@@ -10,7 +10,7 @@ orderRouter.post('/direct', verifyToken, directBuy);       // Direct Buy
 orderRouter.get('/my', verifyToken, getMyOrders);          // User orders with pagination
 orderRouter.get('/', verifyToken, authorizeRoles("Admin"), getAllOrders);
 orderRouter.patch('/:id/status',verifyToken,authorizeRoles("Admin"),updateOrderStatus)
-orderRouter.get('/single', verifyToken, authorizeRoles("Admin"), getSingleOrder);
+orderRouter.get('/single', verifyToken, getSingleOrder);
 
 
 export default orderRouter;
