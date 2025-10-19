@@ -4,6 +4,7 @@ import Product from '../models/product.model.js';
 import ApiError from '../utils/ApiError.js';
 import catchAsync from '../middlewares/catchAsync.js';
 import User from '../models/user.model.js';
+import { sendEmail } from '../config/email.js';
 
 export const placeOrder = catchAsync(async (req, res, next) => {
   const userId = req.user._id;
@@ -129,16 +130,32 @@ export const getMyOrders = catchAsync(async (req, res, next) => {
 
 
 export const getAllOrders = catchAsync(async (req, res, next) => {
-  const { page = 1, limit = 10, search, paymentStatus, orderStatus, paymentMethod } = req.query;
+  const { page = 1, limit = 10, search, paymentStatus, orderStatus, paymentMethod, orderId, date } = req.query;
 
   const query = {};
 
-  // Search by username (case-insensitive)
+  // Search by Order ID
+  if (orderId) {
+    query._id = orderId;
+  }
+
+  // Search by username or email (case-insensitive)
   if (search) {
     const users = await User.find({
-      username: { $regex: search, $options: 'i' },
+      $or: [
+        { username: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ]
     }).select('_id');
     query.user = { $in: users.map(u => u._id) };
+  }
+
+  // Filter by date
+  if (date) {
+    const startDate = new Date(date);
+    const endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 1);
+    query.createdAt = { $gte: startDate, $lt: endDate };
   }
 
   // Filters
@@ -169,7 +186,13 @@ export const getAllOrders = catchAsync(async (req, res, next) => {
 export const getSingleOrder = catchAsync(async (req, res, next) => {
   const { id } = req.query;
 
-  const order = await Order.findById(id)
+  // Allow search by Order ID or user access to their own orders
+  const query = { _id: id };
+  if (req.user.role !== 'Admin') {
+    query.user = req.user._id;
+  }
+
+  const order = await Order.findOne(query)
     .populate('user', 'username email')
     .populate('orderItems.product', 'name price slug description discountPercent discountedPrice');
 
@@ -185,17 +208,38 @@ export const getSingleOrder = catchAsync(async (req, res, next) => {
 
 export const updateOrderStatus = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, notes } = req.body;
 
-  const order = await Order.findById(id);
+  const order = await Order.findById(id).populate('user', 'username email');
   if (!order) return next(new ApiError(404, 'Order not found'));
 
+  const oldStatus = order.orderStatus;
   order.orderStatus = status;
+  if (notes) order.notes = notes;
   await order.save();
+
+  // Send email notification if status changed
+  if (oldStatus !== status) {
+    const emailTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Order Status Update</h2>
+        <p>Dear ${order.user.username},</p>
+        <p>Your order <strong>#${order._id}</strong> status has been updated to: <strong>${status}</strong></p>
+        ${notes ? `<p><strong>Note:</strong> ${notes}</p>` : ''}
+        <p>Thank you for shopping with Mazracare!</p>
+      </div>
+    `;
+    
+    try {
+      await sendEmail(order.user.email, `Order Status Update - ${status}`, emailTemplate);
+    } catch (error) {
+      console.error('Failed to send email notification:', error.message);
+    }
+  }
 
   res.status(200).json({
     success: true,
-    message: 'Order status updated',
+    message: 'Order status updated successfully',
     data: order,
   });
 });
